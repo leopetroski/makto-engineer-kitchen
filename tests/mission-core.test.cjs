@@ -1,0 +1,6 @@
+const test=require("node:test"),assert=require("node:assert/strict"),m=require("../mission-core.js");
+test("mission creation validates input",()=>{assert.throws(()=>m.createMission({title:"",goal:"x"}));const x=m.createMission({title:"ONDA",goal:"Prototype"});assert.equal(x.status,"Backlog");assert.equal(x.history.length,1)});
+test("tasks progress through valid statuses",()=>{const x=m.createMission({title:"A",goal:"B"});m.addTask(x,{title:"Measure",acceptance:"Measured twice"});m.moveTask(x,x.tasks[0].id,"Review");assert.equal(x.tasks[0].status,"Review");assert.throws(()=>m.moveTask(x,x.tasks[0].id,"Invalid"))});
+test("parameters distinguish verified from unverified",()=>{const x=m.createMission({title:"A",goal:"B"});m.addParameter(x,{name:"Width",value:"435",unit:"mm"});assert.equal(x.parameters[0].verified,false)});
+test("decisions and history survive export/import",()=>{const x=m.createMission({title:"A",goal:"B"});m.addDecision(x,{text:"Use removable tray"});const y=m.parseExport(m.exportData([x]));assert.equal(y[0].decisions[0].text,"Use removable tray");assert.ok(y[0].history.length>1)});
+test("reject malformed and duplicate imports",()=>{assert.throws(()=>m.parseExport('{"schema":"wrong","missions":[]}'));const x=m.createMission({title:"A",goal:"B"});assert.throws(()=>m.parseExport(m.exportData([x,x])))});
