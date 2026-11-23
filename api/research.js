@@ -1,7 +1,7 @@
 export default async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
   if(req.method!=="POST")return res.status(405).json({error:"Method not allowed"});
-  const key=process.env.OPENAI_API_KEY;
+  const key=process.env.OPENAI_API_KEY;\n  const access=process.env.MAKTO_ACCESS_KEY;\n  if(!access)return res.status(503).json({error:"Access control not configured"});\n  const supplied=req.headers["x-makto-access-key"];\n  if(typeof supplied!=="string"||supplied!==access)return res.status(401).json({error:"Invalid access key"});
   if(!key)return res.status(503).json({error:"AI service not configured. Add OPENAI_API_KEY to Vercel project settings."});
   const {brief,mode,requirements}=req.body||{};
   if(typeof brief!=="string"||!brief.trim()||brief.length>6000||typeof requirements!=="string"&&requirements!==undefined||String(requirements||"").length>4000)return res.status(400).json({error:"Invalid input"});
