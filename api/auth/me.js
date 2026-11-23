@@ -1,0 +1,1 @@
+import {session} from "./_auth.js";export default function handler(req,res){res.setHeader("Cache-Control","no-store");const user=session(req);if(!user)return res.status(401).json({authenticated:false});res.status(200).json({authenticated:true,login:user.login})}
