@@ -1,12 +1,9 @@
+import {session} from "./auth/_auth.js";
 export default async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
   if(req.method!=="POST")return res.status(405).json({error:"Method not allowed"});
   const key=process.env.OPENAI_API_KEY;
-  const access=process.env.MAKTO_ACCESS_KEY;
-  if(!access)return res.status(503).json({error:"Access control not configured"});
-  const supplied=req.headers["x-makto-access-key"];
-  if(typeof supplied!=="string"||supplied!==access)return res.status(401).json({error:"Invalid access key"});
-  if(!key)return res.status(503).json({error:"AI service not configured. Add OPENAI_API_KEY to Vercel project settings."});
+  if(!session(req))return res.status(401).json({error:"Please sign in with GitHub"});
   const {brief,mode,requirements}=req.body||{};
   if(typeof brief!=="string"||!brief.trim()||brief.length>6000||typeof requirements!=="string"&&requirements!==undefined||String(requirements||"").length>4000)return res.status(400).json({error:"Invalid input"});
   const allowed=["Hybrid","Open exploration","Goal-directed"];if(!allowed.includes(mode))return res.status(400).json({error:"Invalid research mode"});
