@@ -20,7 +20,7 @@ export default async function handler(req,res){
   const perDay=Math.max(1,Math.min(100,Number(process.env.MAKTO_GLOBAL_DAILY_LIMIT)||20));
   const keys=[`makto:ip:${hashed}:${minute}`,`makto:global:${day}`];
   try{
-    const limit=await fetch(redisUrl.replace(/\\/$/,"")+"/pipeline",{method:"POST",headers:{Authorization:"Bearer "+redisToken,"Content-Type":"application/json"},body:JSON.stringify([["INCR",keys[0]],["EXPIRE",keys[0],120],["INCR",keys[1]],["EXPIRE",keys[1],172800]]),signal:AbortSignal.timeout(3500)});
+    const limit=await fetch(redisUrl.replace(/\/$/,"")+"/pipeline",{method:"POST",headers:{Authorization:"Bearer "+redisToken,"Content-Type":"application/json"},body:JSON.stringify([["INCR",keys[0]],["EXPIRE",keys[0],120],["INCR",keys[1]],["EXPIRE",keys[1],172800]]),signal:AbortSignal.timeout(3500)});
     if(!limit.ok)throw Error("Rate-limit storage unavailable");
     const data=await limit.json();
     if(!Array.isArray(data)||data.some(x=>x.error)||!Number.isFinite(Number(data[0]?.result))||!Number.isFinite(Number(data[2]?.result)))throw Error("Rate-limit storage error");
